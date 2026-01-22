@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "platform_api": {
+      "commandName": "Project",
+      "commandLineArgs": "--port 7161",
+      "launchBrowser": false
+    }
+  }
+}
