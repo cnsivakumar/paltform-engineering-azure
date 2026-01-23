@@ -2,7 +2,7 @@ import type { DeploymentRequest } from "../models/DeploymentRequest";
 
 export async function deployApp(request: DeploymentRequest) {
   const response = await fetch(
-   "/api/DeployFunction",
+   "https://eapeafz01-bgdcaqcvaghmhrcj.eastasia-01.azurewebsites.net/api/DeployFunction",
     {
       method: "POST",
       headers: {
