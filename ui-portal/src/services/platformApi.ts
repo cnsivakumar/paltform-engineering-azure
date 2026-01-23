@@ -1,12 +1,8 @@
 import type { DeploymentRequest } from "../models/DeploymentRequest";
 
-
-const FUNCTION_URL = import.meta.env.VITE_DEPLOY_API_URL;
-
-
 export async function deployApp(request: DeploymentRequest) {
   const response = await fetch(
-    `${FUNCTION_URL}`,
+   "/api/DeployFunction",
     {
       method: "POST",
       headers: {
