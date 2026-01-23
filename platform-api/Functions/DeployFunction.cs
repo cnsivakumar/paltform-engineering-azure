@@ -17,17 +17,25 @@ public class DeployFunction
     }
 
     [Function("DeployFunction")]
-    public async Task<HttpResponseData> Run(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "post")] HttpRequestData req)
+    public async Task<HttpResponseData> Run([HttpTrigger(AuthorizationLevel.Anonymous, "post")] HttpRequestData req)
     {
         _logger.LogInformation("Deploy function triggered.");
 
         var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-        var request = JsonSerializer.Deserialize<DeploymentRequest>(requestBody);
+        _logger.LogInformation($"Raw body: {requestBody}");
 
-        _logger.LogInformation($"Deployment request for {request?.appName}");
+        var request = JsonSerializer.Deserialize<DeploymentRequest>(requestBody,new JsonSerializerOptions{ PropertyNameCaseInsensitive = true});
 
-        string decision = request?.deploymentTarget switch
+        if (request == null)
+        {
+            var bad = req.CreateResponse(HttpStatusCode.BadRequest);
+            await bad.WriteStringAsync("Invalid request payload");
+            return bad;
+        }
+
+        _logger.LogInformation($"Deployment request for {request.appName}");
+
+        string decision = request.deploymentTarget switch
         {
             "vm" => "Deploying to Azure Virtual Machine",
             "aks" => "Deploying to Azure Kubernetes Service",
@@ -44,4 +52,5 @@ public class DeployFunction
 
         return response;
     }
+
 }
