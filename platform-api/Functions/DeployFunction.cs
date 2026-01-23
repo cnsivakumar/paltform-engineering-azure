@@ -4,53 +4,39 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
 using platform_api.Models;
+using platform_api.Services;
 
 namespace platform_api;
 
 public class DeployFunction
 {
     private readonly ILogger<DeployFunction> _logger;
+    private readonly IDeploymentDecisionService _decisionService;
 
-    public DeployFunction(ILogger<DeployFunction> logger)
+    public DeployFunction(ILogger<DeployFunction> logger,IDeploymentDecisionService decisionService)
     {
         _logger = logger;
+        _decisionService = decisionService;
     }
 
     [Function("DeployFunction")]
-    public async Task<HttpResponseData> Run([HttpTrigger(AuthorizationLevel.Anonymous, "post")] HttpRequestData req)
-    {
-        _logger.LogInformation("Deploy function triggered.");
-
+    public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Function, "post")]
+        HttpRequest req,
+        [ServiceBus(
+            "%DeploymentQueueName%",
+            Connection = "ServiceBusConnection")]
+        IAsyncCollector<string> queueCollector,
+        ILogger log)
+    {   
         var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-        _logger.LogInformation($"Raw body: {requestBody}");
 
-        var request = JsonSerializer.Deserialize<DeploymentRequest>(requestBody,new JsonSerializerOptions{ PropertyNameCaseInsensitive = true});
+        await queueCollector.AddAsync(requestBody);
 
-        if (request == null)
+        return new OkObjectResult(new
         {
-            var bad = req.CreateResponse(HttpStatusCode.BadRequest);
-            await bad.WriteStringAsync("Invalid request payload");
-            return bad;
-        }
-
-        _logger.LogInformation($"Deployment request for {request.appName}");
-
-        string decision = request.deploymentTarget switch
-        {
-            "vm" => "Deploying to Azure Virtual Machine",
-            "aks" => "Deploying to Azure Kubernetes Service",
-            "webapp" => "Deploying to Azure App Service",
-            _ => "Invalid deployment target"
-        };
-
-        var response = req.CreateResponse(HttpStatusCode.OK);
-        await response.WriteAsJsonAsync(new
-        {
-            message = decision,
-            status = "Accepted"
+            message = "Deployment request accepted",
+            status = "Queued"
         });
-
-        return response;
     }
 
 }
