@@ -25,9 +25,9 @@ public class DeployFunction
         var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
         var request = JsonSerializer.Deserialize<DeploymentRequest>(requestBody);
 
-        _logger.LogInformation($"Deployment request for {request?.AppName}");
+        _logger.LogInformation($"Deployment request for {request?.appName}");
 
-        string decision = request?.DeploymentTarget switch
+        string decision = request?.deploymentTarget switch
         {
             "vm" => "Deploying to Azure Virtual Machine",
             "aks" => "Deploying to Azure Kubernetes Service",
