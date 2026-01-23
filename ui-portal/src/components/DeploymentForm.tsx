@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { createDeployment } from "../services/platformApi";
+import { deployApp } from "../services/platformApi";
 import type { DeploymentRequest } from "../models/DeploymentRequest";
 
 export default function DeploymentForm() {
@@ -35,10 +35,12 @@ export default function DeploymentForm() {
     }
   };
 
+
+
   const submit = async () => {
     try {
-      const result = await createDeployment(form);
-      setStatus(`Request submitted. ID: ${result.requestId}`);
+      const result = await deployApp(form);
+      setStatus(result.message);
     } catch (err: any) {
       setStatus(err.message);
     }
