@@ -1,27 +1,24 @@
-using System.Net;
-using System.Text.Json;
 using Microsoft.Azure.Functions.Worker;
-using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
-using platform_api.Models;
-using platform_api.Services;
 
-public class DeploymentWorkerFunction
+namespace platform_api.Functions;
+
+public class DeployWorkerFunction
 {
-    [FunctionName("DeploymentWorker")]
-    public async Task Run(
+    private readonly ILogger _logger;
+
+    public DeployWorkerFunction(ILoggerFactory loggerFactory)
+    {
+        _logger = loggerFactory.CreateLogger<DeployWorkerFunction>();
+    }
+
+    [Function("DeploymentWorker")]
+    public void Run(
         [ServiceBusTrigger(
             "%DeploymentQueueName%",
             Connection = "ServiceBusConnection")]
-        string message,
-        ILogger log)
+        string message)
     {
-        log.LogInformation($"Processing deployment request: {message}");
-
-        // Step 3 will go here:
-        // - Parse request
-        // - Call DeploymentDecisionService
-        // - Trigger pipeline / AKS / App Service
-        // - Update status
+        _logger.LogInformation($"Processing deployment: {message}");
     }
 }

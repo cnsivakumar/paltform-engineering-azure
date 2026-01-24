@@ -1,18 +1,23 @@
+using Azure.Messaging.ServiceBus;
 using Microsoft.Azure.Functions.Worker;
-using Microsoft.Azure.Functions.Worker.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using platform_api.Services;
 
-var builder = FunctionsApplication.CreateBuilder(args);
+var host = new HostBuilder()
+    .ConfigureFunctionsWorkerDefaults()
+    .ConfigureServices(services =>
+    {
+    
 
-builder.ConfigureFunctionsWebApplication();
+        // App services
+        services.AddSingleton<IDeploymentDecisionService, DeploymentDecisionService>();
 
-builder.Services
-    .AddApplicationInsightsTelemetryWorkerService()
-    .ConfigureFunctionsApplicationInsights();
+        // Service Bus client
+        services.AddSingleton(sp =>
+            new ServiceBusClient(
+                Environment.GetEnvironmentVariable("ServiceBusConnection")));
+    })
+    .Build();
 
-builder.Services.AddSingleton<IDeploymentDecisionService, DeploymentDecisionService>();
-
-
-builder.Build().Run();
+host.Run();
