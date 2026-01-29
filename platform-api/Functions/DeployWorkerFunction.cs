@@ -1,4 +1,5 @@
 using Microsoft.Azure.Functions.Worker;
+using Microsoft.Azure.Functions.Worker.Extensions.ServiceBus;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
 using platform_api.Models;
@@ -7,10 +8,12 @@ namespace platform_api.Functions;
 public class DeployWorkerFunction
 {
     private readonly ILogger _logger;
+    private readonly GitHubActionsService _gitHub;
 
-    public DeployWorkerFunction(ILoggerFactory loggerFactory)
+    public DeployWorkerFunction(ILoggerFactory loggerFactory, GitHubActionsService gitHub)
     {
         _logger = loggerFactory.CreateLogger<DeployWorkerFunction>();
+        _gitHub = gitHub;
     }
 
     [Function("DeploymentWorker")]
@@ -20,27 +23,25 @@ public class DeployWorkerFunction
             Connection = "ServiceBusConnection")]
         string message)
     {
-        _logger.LogInformation("Received deployment message");
-        _logger.LogInformation("Message content: {Message}", message);
-
-        var request = JsonSerializer.Deserialize<DeploymentRequest>(
-            message,
-            new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        var request = JsonSerializer.Deserialize<DeploymentRequest>(message);
 
         if (request == null)
         {
-            _logger.LogError("Failed to deserialize deployment request");
+            _logger.LogError("Invalid message payload");
             return;
         }
 
-        _logger.LogInformation(
-            "Processing deployment for App={AppName}, Env={Env}, Target={Target}",
-            request.appName,
-            request.environment,
-            request.deploymentTarget
+        _logger.LogInformation("Triggering GitHub Actions pipeline");
+
+        await _gitHub.TriggerWorkflowAsync(
+            Environment.GetEnvironmentVariable("GITHUB_OWNER")!,
+            Environment.GetEnvironmentVariable("GITHUB_REPO")!,
+            Environment.GetEnvironmentVariable("GITHUB_TOKEN")!,
+            request.AppName,
+            request.Environment,
+            request.DeploymentTarget
         );
 
-        // Next step: trigger Azure DevOps / GitHub Actions pipeline
-        await Task.CompletedTask;
+        _logger.LogInformation("GitHub workflow triggered successfully");
     }
 }
