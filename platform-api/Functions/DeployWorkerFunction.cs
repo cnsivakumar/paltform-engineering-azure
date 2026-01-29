@@ -35,9 +35,9 @@ public class DeployWorkerFunction
 
         _logger.LogInformation(
             "Processing deployment for App={AppName}, Env={Env}, Target={Target}",
-            request.AppName,
-            request.Environment,
-            request.DeploymentTarget
+            request.appName,
+            request.environment,
+            request.deploymentTarget
         );
 
         // Next step: trigger Azure DevOps / GitHub Actions pipeline
