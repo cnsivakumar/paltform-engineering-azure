@@ -13,7 +13,7 @@ public class DeployWorkerFunction
     }
 
     [Function("DeploymentWorker")]
-    public void Run(
+    public async Task Run(
         [ServiceBusTrigger(
             "deployment-requests",
             Connection = "ServiceBusConnection")]
