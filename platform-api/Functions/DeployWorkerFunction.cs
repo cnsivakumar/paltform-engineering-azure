@@ -1,7 +1,7 @@
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
-
+using platform_api.Models;
 namespace platform_api.Functions;
 
 public class DeployWorkerFunction
