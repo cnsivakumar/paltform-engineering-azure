@@ -8,8 +8,6 @@ var host = new HostBuilder()
     .ConfigureFunctionsWorkerDefaults()
     .ConfigureServices(services =>
     {
-    
-
         // App services
         services.AddSingleton<IDeploymentDecisionService, DeploymentDecisionService>();
 

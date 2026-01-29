@@ -15,10 +15,31 @@ public class DeployWorkerFunction
     [Function("DeploymentWorker")]
     public void Run(
         [ServiceBusTrigger(
-            "%DeploymentQueueName%",
+            "deployment-requests",
             Connection = "ServiceBusConnection")]
         string message)
     {
-        _logger.LogInformation($"Processing deployment: {message}");
+        _logger.LogInformation("Received deployment message");
+        _logger.LogInformation("Message content: {Message}", message);
+
+        var request = JsonSerializer.Deserialize<DeploymentRequest>(
+            message,
+            new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+        if (request == null)
+        {
+            _logger.LogError("Failed to deserialize deployment request");
+            return;
+        }
+
+        _logger.LogInformation(
+            "Processing deployment for App={AppName}, Env={Env}, Target={Target}",
+            request.AppName,
+            request.Environment,
+            request.DeploymentTarget
+        );
+
+        // Next step: trigger Azure DevOps / GitHub Actions pipeline
+        await Task.CompletedTask;
     }
 }
