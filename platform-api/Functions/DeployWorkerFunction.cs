@@ -3,6 +3,7 @@ using Microsoft.Azure.Functions.Worker.Extensions.ServiceBus;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
 using platform_api.Models;
+using platform_api.Services;
 namespace platform_api.Functions;
 
 public class DeployWorkerFunction
@@ -37,9 +38,9 @@ public class DeployWorkerFunction
             Environment.GetEnvironmentVariable("GITHUB_OWNER")!,
             Environment.GetEnvironmentVariable("GITHUB_REPO")!,
             Environment.GetEnvironmentVariable("GITHUB_TOKEN")!,
-            request.AppName,
-            request.Environment,
-            request.DeploymentTarget
+            request.appName,
+            request.environment,
+            request.deploymentTarget
         );
 
         _logger.LogInformation("GitHub workflow triggered successfully");
