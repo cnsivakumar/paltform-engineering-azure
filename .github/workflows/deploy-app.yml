@@ -1,0 +1,21 @@
+name: Platform Deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      appName:
+        required: true
+      environment:
+        required: true
+      target:
+        required: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print deployment info
+        run: |
+          echo "App: ${{ inputs.appName }}"
+          echo "Env: ${{ inputs.environment }}"
+          echo "Target: ${{ inputs.target }}"
